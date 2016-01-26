@@ -19,7 +19,7 @@ execute 'httpd install' do
 end
 
 service "httpd" do
-  action :start
+  action [:start, :enable]
 end
 
 bash "phpmyadmin" do
@@ -29,8 +29,8 @@ bash "phpmyadmin" do
     tar xvzf phpMyAdmin-4.4.14.1-all-languages.tar.gz
     mv phpMyAdmin-4.4.14.1-all-languages /vagrant_data/sites/phpmyadmin
     cp /vagrant_data/sites/phpmyadmin/config.sample.inc.php /vagrant_data/sites/phpmyadmin/config.inc.php 
-    chown -R root.apache /vagrant_data/sites/phpmyadmin/ 
-    chmod 660 /vagrant_data/sites/phpmyadmin/config.inc.php 
+    #chown -R root.apache /vagrant_data/sites/phpmyadmin/ 
+    chmod 705 /vagrant_data/sites/phpmyadmin/config.inc.php 
   EOC
 end
 
@@ -46,16 +46,16 @@ execute 'mysql install' do
 end
 
 service "mysqld" do
-  action :start
+  action [:start, :enable]
 end
 
 # phpmyadmin
-#bash "phpmyadmin" do
-#  user 'root'
-#  code <<-EOC
-#    mysql -u root -e "set password for 'root'@'localhost' = password('');"
-#  EOC
-#end
+bash "phpmyadmin" do
+  user 'root'
+  code <<-EOC
+    mysql -u root -e "set password for 'root'@'localhost' = password('password');"
+  EOC
+end
 
 # repository
 bash 'add_epel' do
@@ -121,3 +121,7 @@ execute 'iptable stop' do
   command '/etc/rc.d/init.d/iptables stop'
 end
 
+execute 'iptable off' do
+  user 'root'
+  command 'chkconfig "iptables" off'
+end
